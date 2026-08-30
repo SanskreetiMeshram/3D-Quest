@@ -104,12 +104,27 @@ export class Game {
     if (statusText) statusText.textContent = 'Academy Ready!';
     if (btnStartLoaded) {
       btnStartLoaded.classList.remove('hidden');
-      btnStartLoaded.addEventListener('click', () => {
+      
+      const enterMenu = () => {
         this.audioManager.resume();
         this.audioManager.startAmbientBgm();
-        loadingScreen.classList.add('hidden');
+        loadingScreen?.classList.add('hidden');
         this.mainMenu.show();
         this.gameState.setMode(GAME_MODES.MAIN_MENU);
+      };
+
+      btnStartLoaded.addEventListener('click', enterMenu);
+      loadingScreen?.addEventListener('click', (e) => {
+        if (!btnStartLoaded.classList.contains('hidden')) {
+          enterMenu();
+        }
+      });
+      window.addEventListener('keydown', (e) => {
+        if (this.gameState.mode === GAME_MODES.LOADING && !btnStartLoaded.classList.contains('hidden')) {
+          if (['Space', 'Enter', 'KeyE'].includes(e.code)) {
+            enterMenu();
+          }
+        }
       });
     }
 

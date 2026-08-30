@@ -18,51 +18,42 @@ export class AssetManager {
     const baseUrl = import.meta.env.BASE_URL || '/';
     const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
     const assetList = [
-      { key: 'player', path: `${cleanBase}models/player.glb`, type: 'model' },
-      { key: 'teacher', path: `${cleanBase}models/teacher.glb`, type: 'model' },
-      { key: 'building', path: `${cleanBase}models/building.glb`, type: 'model' },
-      { key: 'desk', path: `${cleanBase}models/desk.glb`, type: 'model' },
-      { key: 'coin', path: `${cleanBase}models/coin.glb`, type: 'model' }
+      { key: 'player', path: `${cleanBase}models/player.glb` },
+      { key: 'teacher', path: `${cleanBase}models/teacher.glb` },
+      { key: 'building', path: `${cleanBase}models/building.glb` },
+      { key: 'desk', path: `${cleanBase}models/desk.glb` },
+      { key: 'coin', path: `${cleanBase}models/coin.glb` }
     ];
 
-    this.totalAssets = assetList.length + 5; // +5 procedural generation steps
-    let current = 0;
+    if (onProgress) onProgress(20, 'Constructing 3D Geometry Academy...');
 
-    const report = (name) => {
-      current++;
-      if (onProgress) {
-        const percent = Math.min(100, Math.round((current / this.totalAssets) * 100));
-        onProgress(percent, name);
-      }
-    };
-
-    // Attempt to load external assets, fallback gracefully if not found
-    for (const asset of assetList) {
+    // Load assets in parallel with fast timeout
+    const loadPromises = assetList.map(async (asset) => {
       try {
         const gltf = await this.loadGLB(asset.path);
         this.models.set(asset.key, gltf);
-        report(`Loaded ${asset.key}`);
-      } catch (err) {
-        // Safe fallback - procedural generation will take over
-        this.models.set(asset.key, null);
-        report(`Generated fallback for ${asset.key}`);
+      } catch (e) {
+        this.models.set(asset.key, null); // Fallback to procedural model
       }
-    }
+    });
 
-    // Step through procedural geometry prep
-    report('Crafting mathematical architecture...');
-    report('Synthesizing audio frequencies...');
-    report('Preparing geometry question bank...');
-    report('Initializing Academy physics...');
-    report('Ready to explore dimensions!');
+    await Promise.allSettled(loadPromises);
+
+    if (onProgress) onProgress(60, 'Generating Mathematical Architecture...');
+    await new Promise(r => setTimeout(r, 100));
+
+    if (onProgress) onProgress(85, 'Synthesizing Audio Frequencies...');
+    await new Promise(r => setTimeout(r, 100));
+
+    if (onProgress) onProgress(100, 'Academy Ready!');
   }
 
   loadGLB(url) {
     return new Promise((resolve, reject) => {
-      // Set a short timeout so missing optional files don't block the game
+      // 300ms quick check so non-existent optional models do not cause perceptible lag
       const timer = setTimeout(() => {
-        reject(new Error('Asset load timeout'));
-      }, 1500);
+        reject(new Error('Optional asset not present'));
+      }, 300);
 
       this.loader.load(
         url,
