@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,10 90,90 10,90' fill='%234361ee'/><circle cx='50' cy='60' r='16' fill='%234cc9f0'/></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Geometry Quest 3D | Educational Adventure</title>
+    <meta name="description" content="An interactive 3D browser-based educational geometry adventure game. Explore the 3D Academy, solve challenges, and master mathematics!" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <!-- Three.js Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- UI Overlay Container -->
+    <div id="ui-container">
+      <!-- Loading Screen -->
+      <div id="loading-screen" class="ui-screen active">
+        <div class="loading-card glass-panel">
+          <div class="logo-box">
+            <div class="spinning-poly">
+              <div class="poly-face poly-1"></div>
+              <div class="poly-face poly-2"></div>
+              <div class="poly-face poly-3"></div>
+            </div>
+            <h1 class="game-title">GEOMETRY QUEST <span>3D</span></h1>
+            <p class="subtitle">Academy of Mathematical Dimensions</p>
+          </div>
+          <div class="progress-section">
+            <div class="progress-bar-bg">
+              <div id="loading-progress-bar" class="progress-bar-fill" style="width: 0%"></div>
+            </div>
+            <div class="loading-status-row">
+              <span id="loading-status-text">Constructing Geometry Academy...</span>
+              <span id="loading-percent-text">0%</span>
+            </div>
+          </div>
+          <div class="loading-tip">
+            <span class="tip-icon">💡</span>
+            <span id="loading-tip-text">Did you know? The sum of angles in any triangle on a flat plane is always 180°!</span>
+          </div>
+          <button id="btn-start-loaded" class="btn btn-primary btn-pulse hidden">ENTER ACADEMY</button>
+        </div>
+      </div>
+
+      <!-- Main Menu Screen -->
+      <div id="main-menu-screen" class="ui-screen hidden">
+        <div class="menu-container">
+          <div class="menu-header">
+            <div class="badge-tag">📐 Interactive 3D Math Adventure</div>
+            <h1 class="main-title">GEOMETRY QUEST <span>3D</span></h1>
+            <p class="menu-desc">Explore rooms, master geometry, earn stars, and solve the Academy mysteries.</p>
+          </div>
+
+          <div class="menu-buttons-grid">
+            <button id="btn-menu-play" class="btn btn-hero">
+              <span class="btn-icon">🎮</span>
+              <span class="btn-text">
+                <strong>PLAY NOW</strong>
+                <small>Enter 3D Geometry Academy</small>
+              </span>
+            </button>
+            <button id="btn-menu-continue" class="btn btn-secondary">
+              <span class="btn-icon">🚀</span>
+              <span class="btn-text">
+                <strong>CONTINUE QUEST</strong>
+                <small id="continue-info">Level 1 • Courtyard</small>
+              </span>
+            </button>
+            <button id="btn-menu-topics" class="btn btn-secondary">
+              <span class="btn-icon">📚</span>
+              <span class="btn-text">
+                <strong>TOPIC CHALLENGES</strong>
+                <small>13 Interactive Geometry Modules</small>
+              </span>
+            </button>
+            <button id="btn-menu-howtoplay" class="btn btn-secondary">
+              <span class="btn-icon">📖</span>
+              <span class="btn-text">
+                <strong>HOW TO PLAY</strong>
+                <small>Controls, Combat & Rules</small>
+              </span>
+            </button>
+            <button id="btn-menu-settings" class="btn btn-secondary">
+              <span class="btn-icon">⚙️</span>
+              <span class="btn-text">
+                <strong>SETTINGS</strong>
+                <small>Audio, Graphics & Controls</small>
+              </span>
+            </button>
+          </div>
+
+          <div class="menu-quick-stats glass-panel">
+            <div class="stat-pill"><span class="icon">⭐</span> <span id="menu-total-stars">0 / 39 Stars</span></div>
+            <div class="stat-pill"><span class="icon">🏆</span> <span id="menu-player-lvl">Level 1</span></div>
+            <div class="stat-pill"><span class="icon">🪙</span> <span id="menu-total-tokens">0 Tokens</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Heads Up Display (HUD) during 3D Gameplay -->
+      <div id="hud" class="ui-layer hidden">
+        <!-- Top Bar Stats -->
+        <div class="hud-top-bar">
+          <div class="hud-left glass-panel">
+            <div class="player-profile">
+              <div class="profile-avatar">🎓</div>
+              <div class="profile-info">
+                <div class="level-row">
+                  <span id="hud-level-badge" class="badge">LVL 1</span>
+                  <span id="hud-title-badge" class="title-text">Novice Geometer</span>
+                </div>
+                <div class="xp-bar-container">
+                  <div id="hud-xp-bar" class="xp-bar-fill" style="width: 0%"></div>
+                  <span id="hud-xp-text" class="xp-label">0 / 100 XP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hud-center">
+            <div id="hud-location-banner" class="location-banner glass-panel">
+              <span class="loc-icon">🏛️</span>
+              <span id="hud-location-name">Central Courtyard</span>
+            </div>
+          </div>
+
+          <div class="hud-right glass-panel">
+            <div class="stat-counter">
+              <span class="stat-icon">🪙</span>
+              <span id="hud-tokens-count" class="stat-value">0</span>
+            </div>
+            <div class="stat-counter">
+              <span class="stat-icon">⭐</span>
+              <span id="hud-score-count" class="stat-value">0</span>
+            </div>
+            <button id="btn-hud-topics" class="btn-icon-hud" title="Topic Selection (M)">📚</button>
+            <button id="btn-hud-pause" class="btn-icon-hud" title="Pause Menu (Esc)">⏸️</button>
+          </div>
+        </div>
+
+        <!-- Objective & Quest Pointer -->
+        <div class="hud-objective-card glass-panel">
+          <span class="obj-badge">ACTIVE OBJECTIVE</span>
+          <p id="hud-objective-text">Talk to Teacher Archimedes or step onto a glowing Room Pedestal to start a Challenge!</p>
+        </div>
+
+        <!-- Dynamic Interaction Prompt -->
+        <div id="interaction-prompt" class="interaction-prompt hidden">
+          <div class="key-cap">E</div>
+          <span id="interaction-text">INTERACT</span>
+        </div>
+
+        <!-- Controls Helper for desktop / touch -->
+        <div class="hud-controls-helper glass-panel">
+          <div class="control-key"><span>W A S D</span> Move</div>
+          <div class="control-key"><span>SHIFT</span> Run</div>
+          <div class="control-key"><span>SPACE</span> Jump</div>
+          <div class="control-key"><span>E</span> Interact</div>
+          <div class="control-key"><span>MOUSE</span> Look / Orbit</div>
+        </div>
+
+        <!-- Mobile Touch Joystick / Buttons (Shown on touch devices) -->
+        <div id="mobile-controls" class="mobile-controls hidden">
+          <div id="joystick-zone" class="joystick-zone">
+            <div id="joystick-thumb" class="joystick-thumb"></div>
+          </div>
+          <div class="mobile-actions">
+            <button id="btn-mobile-jump" class="mobile-btn jump-btn">JUMP</button>
+            <button id="btn-mobile-interact" class="mobile-btn interact-btn">ACTION [E]</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teacher Dialogue Box -->
+      <div id="dialogue-box" class="ui-layer hidden">
+        <div class="dialogue-card glass-panel">
+          <div class="dialogue-portrait">
+            <div class="teacher-avatar">👨‍🏫</div>
+            <span class="speaker-name">Prof. Archimedes</span>
+            <span class="speaker-role">Dean of Geometry</span>
+          </div>
+          <div class="dialogue-content">
+            <p id="dialogue-text" class="typewriter-text">Welcome to Geometry Academy!</p>
+            <div class="dialogue-actions">
+              <span class="dialogue-hint">Press <kbd>E</kbd> or click to continue</span>
+              <button id="btn-dialogue-next" class="btn btn-sm btn-primary">NEXT ➔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topic Selection Menu Screen -->
+      <div id="topic-menu-screen" class="ui-screen hidden">
+        <div class="modal-card wide-card glass-panel">
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title">📐 Geometry Academy Topics</h2>
+              <p class="modal-subtitle">Select a topic challenge or fast-travel to a room in the 3D Academy.</p>
+            </div>
+            <button id="btn-close-topics" class="btn-close">✕</button>
+          </div>
+
+          <div id="topics-grid" class="topics-grid">
+            <!-- Dynamically populated 13 topic cards -->
+          </div>
+
+          <div class="modal-footer">
+            <button id="btn-back-from-topics" class="btn btn-secondary">BACK TO ACADEMY</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz / Challenge Screen -->
+      <div id="quiz-screen" class="ui-screen hidden">
+        <div class="quiz-container glass-panel">
+          <!-- Quiz Top Header -->
+          <div class="quiz-header">
+            <div class="quiz-info-left">
+              <span id="quiz-topic-badge" class="badge badge-accent">Triangles</span>
+              <span id="quiz-question-counter" class="counter-text">Question 1 / 10</span>
+            </div>
+
+            <div class="quiz-timer-box">
+              <span class="timer-icon">⏳</span>
+              <span id="quiz-timer-text" class="timer-value">30s</span>
+              <div class="timer-bar-bg">
+                <div id="quiz-timer-bar" class="timer-bar-fill" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div class="quiz-stats-right">
+              <div class="lives-container" id="quiz-lives-container">
+                <span class="heart full">❤️</span>
+                <span class="heart full">❤️</span>
+                <span class="heart full">❤️</span>
+              </div>
+              <div id="quiz-combo-badge" class="combo-badge hidden">COMBO x2! 🔥</div>
+            </div>
+          </div>
+
+          <!-- Quiz Body -->
+          <div class="quiz-body">
+            <div class="question-main-area">
+              <h3 id="quiz-question-text" class="question-title">What is the sum of interior angles in any triangle?</h3>
+              <!-- Dynamic Visual Diagram Container -->
+              <div id="quiz-diagram-container" class="quiz-diagram-container">
+                <!-- SVG Diagram rendered here -->
+              </div>
+            </div>
+
+            <!-- 4 Options Grid -->
+            <div id="quiz-options-grid" class="options-grid">
+              <button class="option-btn" data-index="0">
+                <span class="opt-letter">A</span>
+                <span class="opt-text">90 degrees</span>
+              </button>
+              <button class="option-btn" data-index="1">
+                <span class="opt-letter">B</span>
+                <span class="opt-text">180 degrees</span>
+              </button>
+              <button class="option-btn" data-index="2">
+                <span class="opt-letter">C</span>
+                <span class="opt-text">270 degrees</span>
+              </button>
+              <button class="option-btn" data-index="3">
+                <span class="opt-letter">D</span>
+                <span class="opt-text">360 degrees</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Feedback / Explanation Overlay -->
+          <div id="quiz-feedback-bar" class="quiz-feedback-bar hidden">
+            <div class="feedback-icon-text">
+              <span id="feedback-icon" class="fb-icon">✅</span>
+              <div class="fb-content">
+                <strong id="feedback-title">CORRECT!</strong>
+                <p id="feedback-explanation">The interior angles of every triangle in Euclidean geometry always sum to exactly 180°.</p>
+              </div>
+            </div>
+            <button id="btn-quiz-continue" class="btn btn-primary">CONTINUE ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results / Summary Screen -->
+      <div id="results-screen" class="ui-screen hidden">
+        <div class="results-card glass-panel">
+          <div class="results-banner">
+            <div id="results-stars-row" class="stars-row">
+              <span class="star-big star-gold">⭐</span>
+              <span class="star-big star-gold">⭐</span>
+              <span class="star-big star-gold">⭐</span>
+            </div>
+            <h2 id="results-title" class="results-title">CHALLENGE COMPLETE!</h2>
+            <p id="results-subtitle" class="results-subtitle">You have mastered the Triangle Domain!</p>
+          </div>
+
+          <div class="results-stats-grid">
+            <div class="res-stat-box">
+              <span class="res-label">FINAL SCORE</span>
+              <span id="res-score-value" class="res-val highlight">1,450</span>
+            </div>
+            <div class="res-stat-box">
+              <span class="res-label">ACCURACY</span>
+              <span id="res-accuracy-value" class="res-val">100%</span>
+            </div>
+            <div class="res-stat-box">
+              <span class="res-label">CORRECT ANSWERS</span>
+              <span id="res-correct-value" class="res-val">10 / 10</span>
+            </div>
+            <div class="res-stat-box">
+              <span class="res-label">XP EARNED</span>
+              <span id="res-xp-value" class="res-val">+250 XP</span>
+            </div>
+            <div class="res-stat-box">
+              <span class="res-label">TOKENS REWARD</span>
+              <span id="res-tokens-value" class="res-val">+5 🪙</span>
+            </div>
+            <div class="res-stat-box">
+              <span class="res-label">TIME BONUS</span>
+              <span id="res-time-value" class="res-val">+120 pts</span>
+            </div>
+          </div>
+
+          <div class="results-actions">
+            <button id="btn-res-retry" class="btn btn-secondary">🔄 RETRY CHALLENGE</button>
+            <button id="btn-res-topics" class="btn btn-secondary">📚 TOPIC MENU</button>
+            <button id="btn-res-continue" class="btn btn-hero">🚀 RETURN TO 3D WORLD</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Menu Screen -->
+      <div id="pause-screen" class="ui-screen hidden">
+        <div class="modal-card small-card glass-panel">
+          <h2 class="modal-title">⏸️ GAME PAUSED</h2>
+          <div class="menu-buttons-vertical">
+            <button id="btn-pause-resume" class="btn btn-hero">▶️ RESUME GAME</button>
+            <button id="btn-pause-topics" class="btn btn-secondary">📚 TOPICS & FAST TRAVEL</button>
+            <button id="btn-pause-settings" class="btn btn-secondary">⚙️ SETTINGS</button>
+            <button id="btn-pause-mainmenu" class="btn btn-secondary">🏠 MAIN MENU</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Screen -->
+      <div id="settings-screen" class="ui-screen hidden">
+        <div class="modal-card medium-card glass-panel">
+          <div class="modal-header">
+            <h2 class="modal-title">⚙️ Game Settings</h2>
+            <button id="btn-close-settings" class="btn-close">✕</button>
+          </div>
+
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-info">
+                <strong>🎵 Music Volume</strong>
+                <small>Ambient academy background music</small>
+              </div>
+              <input type="range" id="setting-bgm-volume" min="0" max="100" value="60" class="slider" />
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <strong>🔊 Sound Effects</strong>
+                <small>Interactions, coins, jumping, quiz chime</small>
+              </div>
+              <input type="range" id="setting-sfx-volume" min="0" max="100" value="80" class="slider" />
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <strong>🌟 Graphics Quality</strong>
+                <small>Adjust shadows & render resolution</small>
+              </div>
+              <select id="setting-graphics" class="select-box">
+                <option value="high">High (Shadows + Anti-Aliasing)</option>
+                <option value="medium" selected>Medium (Standard)</option>
+                <option value="low">Low (Battery Saver)</option>
+              </select>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <strong>💡 Show On-screen Help</strong>
+                <small>Display movement tips and hints in HUD</small>
+              </div>
+              <input type="checkbox" id="setting-hints" checked class="toggle" />
+            </div>
+
+            <div class="setting-item danger-zone">
+              <div class="setting-info">
+                <strong class="danger-text">⚠️ Reset Progress</strong>
+                <small>Erase stars, high scores and unlock status</small>
+              </div>
+              <button id="btn-reset-save" class="btn btn-danger btn-sm">RESET DATA</button>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button id="btn-save-settings" class="btn btn-primary">SAVE & CLOSE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- How to Play Screen -->
+      <div id="howtoplay-screen" class="ui-screen hidden">
+        <div class="modal-card wide-card glass-panel">
+          <div class="modal-header">
+            <h2 class="modal-title">📖 How To Play Geometry Quest 3D</h2>
+            <button id="btn-close-howtoplay" class="btn-close">✕</button>
+          </div>
+
+          <div class="howtoplay-content">
+            <div class="guide-grid">
+              <div class="guide-box">
+                <h3>🎮 Controls & Exploration</h3>
+                <ul>
+                  <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> - Move player in 3D</li>
+                  <li><kbd>SHIFT</kbd> - Sprint / Run faster</li>
+                  <li><kbd>SPACE</kbd> - Jump over obstacles & fountains</li>
+                  <li><kbd>MOUSE</kbd> - Look around and orbit camera</li>
+                  <li><kbd>E</kbd> - Interact with doors, NPCs, & challenge terminals</li>
+                  <li><kbd>ESC</kbd> - Open Pause Menu</li>
+                </ul>
+              </div>
+
+              <div class="guide-box">
+                <h3>🏆 Challenges & Progression</h3>
+                <ul>
+                  <li><strong>Explore 10 Themed Rooms</strong>: Each dedicated to core geometry topics.</li>
+                  <li><strong>Answer Questions</strong>: Beat the 30-second timer and maintain combos.</li>
+                  <li><strong>Earn 3 Stars</strong>: High accuracy and fast answers award 3 stars per topic.</li>
+                  <li><strong>Level Up</strong>: Gain XP and unlock the Final Master Arena!</li>
+                  <li><strong>Collect Tokens</strong>: Grab glowing geometric shapes in the courtyard.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button id="btn-back-howtoplay" class="btn btn-primary">GOT IT, LET'S PLAY!</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Toast -->
+      <div id="toast" class="toast hidden">
+        <span id="toast-icon">✨</span>
+        <span id="toast-msg">Level Up! You reached Level 2</span>
+      </div>
+    </div>
+
+    <!-- Main Module Script -->
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
