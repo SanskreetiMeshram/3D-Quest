@@ -105,7 +105,7 @@ async function run() {
   await client.send('Runtime.enable');
 
   console.log('Navigating to game instance...');
-  await client.send('Page.navigate', { url: 'http://localhost:5173/Geometry-Quest-3D/' });
+  await client.send('Page.navigate', { url: 'http://localhost:5173/3D-Quest/' });
 
   await sleep(2500);
 
