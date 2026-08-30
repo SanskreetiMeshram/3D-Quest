@@ -190,13 +190,24 @@ export class Game {
     this.pauseMenu = new PauseMenu(this.gameState, this.audioManager, (action) => {
       this.pauseMenu.hide();
       if (action === 'resume') {
-        this.enterExploration();
+        if (this.previousMode === GAME_MODES.CHALLENGE) {
+          this.gameState.setMode(GAME_MODES.CHALLENGE);
+          if (!this.challengeManager.quizEngine.isAnswered) {
+            this.challengeManager.quizEngine.startTimer();
+          }
+        } else {
+          this.enterExploration();
+        }
       } else if (action === 'topics') {
+        this.challengeManager.quizEngine.stopTimer();
+        this.quizScreen.hide();
         this.openTopicMenu();
       } else if (action === 'settings') {
         this.settingsScreen.show();
       } else if (action === 'mainmenu') {
+        this.challengeManager.quizEngine.stopTimer();
         this.hud.hide();
+        this.quizScreen.hide();
         this.mainMenu.show();
         this.gameState.setMode(GAME_MODES.MAIN_MENU);
       }
@@ -259,11 +270,24 @@ export class Game {
 
   togglePause() {
     if (this.gameState.mode === GAME_MODES.EXPLORATION) {
+      this.previousMode = GAME_MODES.EXPLORATION;
+      this.gameState.setMode(GAME_MODES.PAUSED);
+      this.pauseMenu.show();
+    } else if (this.gameState.mode === GAME_MODES.CHALLENGE) {
+      this.previousMode = GAME_MODES.CHALLENGE;
+      this.challengeManager.quizEngine.stopTimer();
       this.gameState.setMode(GAME_MODES.PAUSED);
       this.pauseMenu.show();
     } else if (this.gameState.mode === GAME_MODES.PAUSED) {
       this.pauseMenu.hide();
-      this.enterExploration();
+      if (this.previousMode === GAME_MODES.CHALLENGE) {
+        this.gameState.setMode(GAME_MODES.CHALLENGE);
+        if (!this.challengeManager.quizEngine.isAnswered) {
+          this.challengeManager.quizEngine.startTimer();
+        }
+      } else {
+        this.enterExploration();
+      }
     }
   }
 

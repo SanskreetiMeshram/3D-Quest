@@ -15,12 +15,14 @@ export class AssetManager {
   }
 
   async loadAll(onProgress) {
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
     const assetList = [
-      { key: 'player', path: 'models/player.glb', type: 'model' },
-      { key: 'teacher', path: 'models/teacher.glb', type: 'model' },
-      { key: 'building', path: 'models/building.glb', type: 'model' },
-      { key: 'desk', path: 'models/desk.glb', type: 'model' },
-      { key: 'coin', path: 'models/coin.glb', type: 'model' }
+      { key: 'player', path: `${cleanBase}models/player.glb`, type: 'model' },
+      { key: 'teacher', path: `${cleanBase}models/teacher.glb`, type: 'model' },
+      { key: 'building', path: `${cleanBase}models/building.glb`, type: 'model' },
+      { key: 'desk', path: `${cleanBase}models/desk.glb`, type: 'model' },
+      { key: 'coin', path: `${cleanBase}models/coin.glb`, type: 'model' }
     ];
 
     this.totalAssets = assetList.length + 5; // +5 procedural generation steps
